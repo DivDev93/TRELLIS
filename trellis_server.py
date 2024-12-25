@@ -6,6 +6,7 @@ from typing import *
 import torch
 import numpy as np
 import imageio
+import uuid
 from easydict import EasyDict as edict
 from PIL import Image
 from trellis.pipelines import TrellisImageTo3DPipeline
