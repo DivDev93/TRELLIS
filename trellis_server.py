@@ -1,10 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
 import os
-import uuid
+import shutil
+from typing import *
+import torch
+import numpy as np
+import imageio
+from easydict import EasyDict as edict
 from PIL import Image
 from trellis.pipelines import TrellisImageTo3DPipeline
-from trellis.utils import postprocessing_utils
+from trellis.representations import Gaussian, MeshExtractResult
+from trellis.utils import render_utils, postprocessing_utils
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -13,6 +19,19 @@ app = FastAPI()
 pipeline = TrellisImageTo3DPipeline.from_pretrained("JeffreyXiang/TRELLIS-image-large")
 pipeline.cuda()  # Ensure this runs on a GPU-enabled environment
 
+def preprocess_image(image: Image.Image) -> Image.Image:
+    """
+    Preprocess the input image.
+
+    Args:
+        image (Image.Image): The input image.
+
+    Returns:
+        Image.Image: The preprocessed image.
+    """
+    processed_image = pipeline.preprocess_image(image)
+    return processed_image
+    
 def process_image_to_3d(image_path: str, output_dir: str) -> str:
     """
     Takes an input image, runs it through the Trellis pipeline, and saves a .glb file.
@@ -41,6 +60,8 @@ async def generate_model(file: UploadFile = File(...)):
     with open(image_path, "wb") as f:
         f.write(await file.read())
 
+    image_path = pipeline.preprocess_image(image_path)
+    
     # Step 2: Create an output directory for the model
     output_dir = "/tmp/trellis_outputs"
     os.makedirs(output_dir, exist_ok=True)
