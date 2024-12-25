@@ -39,7 +39,7 @@ def process_image_to_3d(image_path: str, output_dir: str) -> str:
     """
     # Open the image
     image = Image.open(image_path)
-    image = pipeline.preprocess_image(image_path)
+    image = pipeline.preprocess_image(image)
     
     # Run the Trellis pipeline
     outputs = pipeline.run(image)
