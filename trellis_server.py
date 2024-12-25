@@ -39,7 +39,8 @@ def process_image_to_3d(image_path: str, output_dir: str) -> str:
     """
     # Open the image
     image = Image.open(image_path)
-
+    image = pipeline.preprocess_image(image_path)
+    
     # Run the Trellis pipeline
     outputs = pipeline.run(image)
 
@@ -60,8 +61,6 @@ async def generate_model(file: UploadFile = File(...)):
     image_path = os.path.join(temp_dir, f"{uuid.uuid4()}_{file.filename}")
     with open(image_path, "wb") as f:
         f.write(await file.read())
-
-    image_path = pipeline.preprocess_image(image_path)
     
     # Step 2: Create an output directory for the model
     output_dir = "/tmp/trellis_outputs"
